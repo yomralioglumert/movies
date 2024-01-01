@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesApi.Data;
+using MoviesApi.Dtos;
 using MoviesApi.Entities;
 
 namespace MoviesApi.Controllers;
@@ -12,6 +13,15 @@ public class MovieController(MainDbContext dbContext) : ControllerBase
 {
     private readonly MainDbContext _dbContext = dbContext;
 
+    private static MovieEntity ToEntity(CreateMovieDto movieDto)
+    {
+        return new MovieEntity
+        {
+            Description = movieDto.Description,
+            Name = movieDto.Name,
+            Url = movieDto.Url
+        };
+    }
     [HttpGet]
     public async Task<ActionResult> ListMovie()
     {
@@ -29,8 +39,9 @@ public class MovieController(MainDbContext dbContext) : ControllerBase
         return Ok(movie);
     }
     [HttpPost]
-    public async Task<ActionResult> CreateMovie(MovieEntity movie)
+    public async Task<ActionResult> CreateMovie(CreateMovieDto dto)
     {
+        var movie = ToEntity(dto);
         await _dbContext.Movies.AddAsync(movie);
         await _dbContext.SaveChangesAsync();
         return CreatedAtAction(nameof(GetMovie), new {id = movie.Id}, movie);

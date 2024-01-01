@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesApi.Data;
+using MoviesApi.Dtos;
 using MoviesApi.Entities;
 
 namespace MoviesApi.Controllers;
@@ -11,6 +12,15 @@ namespace MoviesApi.Controllers;
 public class CommendController (MainDbContext dbContext): ControllerBase
 {
     private readonly MainDbContext _dbContext = dbContext;
+    private static CommendEntity ToEntity(CreateCommendDto commendDto)
+    {
+        return new CommendEntity
+        {
+            MovieId = commendDto.MovieId,
+            UserId = commendDto.UserId,
+            Text = commendDto.Text
+        };
+    }
     
     [HttpGet]
     public async Task<ActionResult> ListCommend()
@@ -29,8 +39,9 @@ public class CommendController (MainDbContext dbContext): ControllerBase
         return Ok(commend);
     }
     [HttpPost]
-    public async Task<ActionResult> CreateCommend(CommendEntity commend)
+    public async Task<ActionResult> CreateCommend(CreateCommendDto dto)
     {
+        var commend = ToEntity(dto);
         await _dbContext.Commends.AddAsync(commend);
         await _dbContext.SaveChangesAsync();
         return CreatedAtAction(nameof(GetCommend), new {id = commend.Id}, commend);
